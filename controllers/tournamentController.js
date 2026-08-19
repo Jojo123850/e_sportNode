@@ -1,7 +1,8 @@
-// const User = require('../models/userModel')
-// const Team = require('../models/teamsModel')
-// const Member = require('../models/memberModel')
+
 const Tournament = require('../models/tournamentModel')
+const Registered = require('../models/tourRegisteredModel')
+const Team = require('../models/teamsModel')
+const Member = require('../models/memberModel')
 
 // US8
 exports.createTournament = async (req, res) => {
@@ -103,3 +104,60 @@ exports.deleteTournament = async (req, res) => {
     }
 }
 
+// US11: inscrire une équipe au tournoi
+exports.teamTournament = async (req, res) => {
+    try {
+
+        // récuperer l'id de teams et l'ajouter dans tournoi
+        const team = await Team.findByPk(req.params.teamId)
+
+        if(!team){
+            return res.status(403).json("Cette équipe existe pas !")
+
+        }
+
+        const tournament = await Tournament.findByPk(req.params.tournamentId)
+
+        if(!tournament){
+            return res.status(403).json("Ce tournoi existe pas")
+        }
+
+        const isMember = await Member.findOne({
+            where: { 
+                userId: req.user.id ,
+                teamId: team.id
+            }
+        })
+
+        if (!isMember) {
+            return res.status(400).json({ message: "Vous faites pas partie du team!!!!!" })
+        }
+
+        const alreadyRegistered = await Registered.findOne({
+            where: {
+                teamId: team.id,
+                tournamentId: tournament.id
+            }
+        })
+
+        if(alreadyRegistered){
+            return res.status(403).json({message:"Cet équipe est déjà inscrit dans le tournoi "})
+        }
+
+        const touRegist = await Registered.create({
+                teamId: team.id,
+                tournamentId: tournament.id
+
+            
+        })
+        
+
+
+    res.status(201).json("Vous etes officielement inscrit à ce tournoi")
+        
+
+        
+    } catch (error) {
+          res.status(500).json({ message: error.message })
+    }
+}
