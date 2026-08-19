@@ -90,15 +90,12 @@ exports.addMember = async (req,res) => {
             return res.status(404).json({ message: 'Equipe non trouvée' })
         }
 
-        const alreadyInTeam = await Member.findOne({
-            where: { userId: req.user.id }
-        })
 
         if(Team.creatorId === req.user.id){
             return res.status(404).json({message: "Seul le capitaine peut ajouter un membre "})
         }
 
-        const { userId } = req.body
+        const { userId } = req.params
 
         if(!userId){
             return res.status(404).json({message: "Il faut l'identifiant du membre "})
@@ -138,4 +135,28 @@ exports.addMember = async (req,res) => {
         res.status(500).json({ message: error.message })
     }
 
+}
+
+exports.removeMember = async (req, res) => {
+    try {
+       const user = await User.findByPk(req.params.userId)
+        
+       if(user === null){
+            return res.status(400).json({ message: "Utilisateur non trouvé" })
+        }
+
+        const team = await Team.findByPk(req.params.teamId)
+    
+        if(Team.creatorId === req.user.id){
+            return res.status(404).json({message: "Seul le capitaine peut supprimer un membre "})
+        }
+
+        await user.destroy()
+
+        res.status(200).json({ message: "L'utilisateur a été supprimée" })
+
+
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
 }
