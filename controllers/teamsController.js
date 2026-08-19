@@ -137,6 +137,8 @@ exports.addMember = async (req,res) => {
 
 }
 
+
+// US7B:Retirer un joueur d'un équipe
 exports.removeMember = async (req, res) => {
     try {
        const user = await User.findByPk(req.params.userId)
@@ -147,11 +149,21 @@ exports.removeMember = async (req, res) => {
 
         const team = await Team.findByPk(req.params.teamId)
     
-        if(Team.creatorId === req.user.id){
-            return res.status(404).json({message: "Seul le capitaine peut supprimer un membre "})
+        if(team.creatorId === req.user.id){
+            return res.status(403).json({message: "Seul le capitaine peut supprimer un membre "})
         }
 
-        await user.destroy()
+        const deletedMember = await Member.destroy({
+             where: {
+                userId: req.params.userId,
+                teamId: req.params.teamId
+        }
+        })
+
+        if(deletedMember == 0){
+              return res.status(403).json({message: "Ce membre n'est pas dans votre équipe"})
+        }
+
 
         res.status(200).json({ message: "L'utilisateur a été supprimée" })
 

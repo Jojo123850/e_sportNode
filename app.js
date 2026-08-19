@@ -20,11 +20,12 @@ app.get('/', (req, res) => {
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes')
 const teamsRoutes = require('./routes/teamsRoutes')
+const tournamentRoutes = require('./routes/tournamentRoutes')
 
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/user', userRoutes)
 app.use('/api/v1/team', teamsRoutes)
-
+app.use('/api/v1/tournament', tournamentRoutes)
 
 async function start() {
 
