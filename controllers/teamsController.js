@@ -94,9 +94,48 @@ exports.addMember = async (req,res) => {
             where: { userId: req.user.id }
         })
 
+        if(Team.creatorId === req.user.id){
+            return res.status(404).json({message: "Seul le capitaine peut ajouter un membre "})
+        }
+
+        const { userId } = req.body
+
+        if(!userId){
+            return res.status(404).json({message: "Il faut l'identifiant du membre "})
+        }
+
+        const userToAddTeam = await User.findOne({userId})
+        if(!userToAddTeam){
+            return res.status(404).json({message: 'Aucun utilisateur a été trouvé'})  
+        }
+
+
+        const alreadyInTeam = await Member.findOne({
+            where: { userId }
+        })
+
+        if (alreadyInTeam) {
+            return res.status(400).json({ message: "Cet utilisateur est déjà dans une équipe" })
+        }
+
+        const nbreMember = await Member.count({
+            where: { teamId: team.id }
+        })
+
+        if (nbreMember >= team.capacity) {
+            return res.status(400).json({ message: "L'équipe est déjà pleine" })
+        }
+
+        const newMember = await Member.create({
+            userId,
+            teamId: team.id
+        })
+
+        res.json(newMember)
         
     } catch (error) {
-        
+        console.log(error)
+        res.status(500).json({ message: error.message })
     }
 
 }
