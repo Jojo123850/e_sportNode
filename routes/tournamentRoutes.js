@@ -3,7 +3,7 @@ const router = express.Router()
 
 const { authMiddleware } = require('../middleware/authMiddleware')
 
-const { createTournament, updateTournament, deleteTournament,teamTournament, getOpenTournament, getTournamentTeam, getTournamentStat} = require('../controllers/tournamentController')
+const { createTournament, updateTournament, deleteTournament,teamTournament, getOpenTournament, getTournamentTeam, getTournamentStat, getMyTournament} = require('../controllers/tournamentController')
 
 router.post('/', authMiddleware, createTournament)
 
@@ -20,6 +20,6 @@ router.get('/:id/teams', authMiddleware, getTournamentTeam )
 
 router.get('/stat/', authMiddleware, getTournamentStat)
 
-
+router.get('/mine', authMiddleware, getMyTournament)
 
 module.exports = router

@@ -245,23 +245,33 @@ exports.getTournamentStat = async (req, res) => {
 }
 
 // US18: consulter mes inscriptions à des tournois
-exports.getTournament = async (req,res) => {
+exports.getMyTournament = async (req,res) => {
     try {
         const memberRel = await Member.findOne({
             where: 
                 {
-                 user: req.user.id
+                 userId: req.user.id
                 }
         })
+
+        if (!memberRel) {
+            return res.status(404).json({ message: "Vous ne faites partie d'aucune équipe" })
+        }
+
         const registration = await Registered.findAll({
             where: {
-                teamId = memberRel.teamId
+                teamId : memberRel.teamId
             } 
         })
+        const tournamentIds = registration.map(r => r.tournamentId)
 
-        const tournament = await Tournament.findByPk(req.params.id)
+        const tournament = await Tournament.findAll({
+            where: {
+                id: tournamentIds
+            }
+        })
 
-        const 
+        res.json(tournament)
         
     } catch (error) {
          res.status(500).json({ message: error.message })
