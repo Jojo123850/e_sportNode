@@ -172,3 +172,64 @@ exports.removeMember = async (req, res) => {
         res.status(500).json({ message: error.message })
     }
 }
+
+// US14: Supprimer une équipe
+exports.deleteTeam = async (req, res) => {
+    try {
+        const team = await Team.findByPk(req.params.teamId)
+
+        if(!team){
+            return res.status(404).json({ message: "Cet équipe existe pas" })
+        }
+
+        const isAdmin = req.user.role === 'admin'
+
+        if(!isAdmin){
+            return res.status(403).json({ message: "Seul l'administrateur peut supprimer une équipe" })
+        }
+
+        await team.destroy()
+
+        res.status(200).json({ message: "L'équipe a été supprimée" })
+        
+    } catch (error) {
+         res.status(500).json({ message: error.message })
+    }
+}
+
+// US17 : consulter les informations d'une équipe
+exports.getDetailTeam = async (req,res) => {
+    try {
+        const team = await Team.findByPk(req.params.teamId)
+
+        if(!team){
+            return res.status(404).json({ message: "Cet équipe existe pas" })
+        }
+
+        const members = await Member.findAll({
+            where: 
+                {
+                 teamId: team.id
+                }
+        })
+
+        const allUser = members.map ( m => m.userId)
+
+        const user = await User.findAll({
+            where: {
+                id: allUser,
+            }, attributes: ['id', 'email', 'role']
+        })
+
+        res.status(200).json({
+            id: team.id,
+            name: team.name,
+            capacity: team.capacity,
+            creatorId: team.creatorId,
+            members: user
+        })
+
+    } catch (error) {
+         res.status(500).json({ message: error.message })
+    }
+}

@@ -4,6 +4,7 @@ const Registered = require('../models/tourRegisteredModel')
 const Team = require('../models/teamsModel')
 const Member = require('../models/memberModel')
 
+
 // US8
 exports.createTournament = async (req, res) => {
     try {
@@ -108,18 +109,18 @@ exports.deleteTournament = async (req, res) => {
 exports.teamTournament = async (req, res) => {
     try {
 
-        // récuperer l'id de teams et l'ajouter dans tournoi
+     
         const team = await Team.findByPk(req.params.teamId)
 
         if(!team){
-            return res.status(403).json("Cette équipe existe pas !")
+            return res.status(404).json("Cette équipe existe pas !")
 
         }
 
         const tournament = await Tournament.findByPk(req.params.tournamentId)
 
         if(!tournament){
-            return res.status(403).json("Ce tournoi existe pas")
+            return res.status(404).json("Ce tournoi existe pas")
         }
 
         const isMember = await Member.findOne({
@@ -159,5 +160,110 @@ exports.teamTournament = async (req, res) => {
         
     } catch (error) {
           res.status(500).json({ message: error.message })
+    }
+}
+
+
+// US12: Lister les tournois ouverts
+exports.getOpenTournament = async (req, res) => {
+    try {
+        
+        const tournament = await Tournament.findAll({
+            where:
+            {
+                isOpen: true
+            }
+        })
+
+        res.status(200).json(tournament)
+        
+    } catch (error) {
+         res.status(500).json({ message: error.message })
+    }
+}
+
+// US13:Voir les équipes inscrites à un tournoi
+exports.getTournamentTeam = async (req, res) => {
+    try {
+        const tournament = await Tournament.findByPk(req.params.id)
+
+        if(!tournament){
+            return res.status(404).json("Ce tournoi existe pas")
+        }
+
+        const register = await Registered.findAll({
+            where: { tournamentId: tournament.id}
+        })
+
+        const allTeams = register.map(r=> r.teamId)
+
+        const team= await Team.findAll({
+            where: {
+                id:allTeams
+            }
+        })
+ 
+
+        res.status(200).json(team)
+        
+    } catch (error) {
+           res.status(500).json({ message: error.message })
+    }
+}
+
+
+
+// US15: Voir les statistiques des particpants
+exports.getTournamentStat = async (req, res) => {
+    try {
+        const isAdmin = req.user.role === 'admin'
+
+        if (!isAdmin) {
+            return res.status(403).json({ message: "Seul l'administrateur peut consulter ces statistiques" })
+        }
+
+        const tournament = await Tournament.findAll()
+        const registration = await Registered.findAll()
+
+        const stat = tournament.map(t => {
+            const teamCount = registration.filter(r => r.tournamentId === t.id).length
+
+            return {
+                id: t.id,
+                name: t.name,
+                game: t.game,
+                date: t.date,
+                teamCount
+            }
+        })
+
+        res.status(200).json(stat)
+
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
+// US18: consulter mes inscriptions à des tournois
+exports.getTournament = async (req,res) => {
+    try {
+        const memberRel = await Member.findOne({
+            where: 
+                {
+                 user: req.user.id
+                }
+        })
+        const registration = await Registered.findAll({
+            where: {
+                teamId = memberRel.teamId
+            } 
+        })
+
+        const tournament = await Tournament.findByPk(req.params.id)
+
+        const 
+        
+    } catch (error) {
+         res.status(500).json({ message: error.message })
     }
 }

@@ -23,6 +23,11 @@ const Tournament = sequelize.define('Tournament', {
     organizerId:{
          type: DataTypes.INTEGER,
          allowNull: false
+     },
+     isOpen: {
+        type: DataTypes.BOOLEAN,
+        allowNull:false,
+        defaultValue:true
      }
 })
 
