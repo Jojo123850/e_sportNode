@@ -76,9 +76,7 @@ const register = async (req, res) => {
     }
 }
 
-// @desc    Login user & get token
-// @route   POST /api/v1/auth/login
-// @access  Public
+// US2
 const login = async (req, res) => {
     try {const register = async (req, res) => {
     try {

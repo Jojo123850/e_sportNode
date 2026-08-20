@@ -2,7 +2,7 @@ const User = require('../models/userModel')
 const Team = require('../models/teamsModel')
 const Member = require('../models/memberModel')
 
-
+// US5: Créer équipe
 exports.createTeam = async (req, res) => {
     try {
         const { name, capacity } = req.body
@@ -43,7 +43,7 @@ exports.createTeam = async (req, res) => {
     }
 }
 
-
+// US6: rejoindre une équipe
 exports.joinTeam = async (req, res) => {
     try {
         const team = await Team.findByPk(req.params.teamId)
@@ -81,7 +81,7 @@ exports.joinTeam = async (req, res) => {
     }
 }
 
-// US7: ajouter membre
+// US7A: ajouter membre
 exports.addMember = async (req,res) => {
     try {
         const team = await Team.findByPk(req.params.teamId)
