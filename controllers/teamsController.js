@@ -82,7 +82,7 @@ exports.joinTeam = async (req, res) => {
 }
 
 // US7A: ajouter membre
-exports.addMember = async (req,res) => {
+exports.addMember = async (req, res) => {
     try {
         const team = await Team.findByPk(req.params.teamId)
 
@@ -90,83 +90,76 @@ exports.addMember = async (req,res) => {
             return res.status(404).json({ message: 'Equipe non trouvée' })
         }
 
-
-        if(Team.creatorId === req.user.id){
-            return res.status(404).json({message: "Seul le capitaine peut ajouter un membre "})
+        if (team.creatorId !== req.user.id) {
+            return res.status(403).json({ message: "Seul le capitaine peut ajouter un membre" })
         }
 
         const { userId } = req.params
 
-        if(!userId){
-            return res.status(404).json({message: "Il faut l'identifiant du membre "})
+        const userToAddTeam = await User.findByPk(userId)
+        if (!userToAddTeam) {
+            return res.status(404).json({ message: 'Aucun utilisateur trouvé' })
         }
 
-        const userToAddTeam = await User.findOne({userId})
-        if(!userToAddTeam){
-            return res.status(404).json({message: 'Aucun utilisateur a été trouvé'})  
-        }
-
-
-        const alreadyInTeam = await Member.findOne({
-            where: { userId }
-        })
-
+        const alreadyInTeam = await Member.findOne({ 
+            where: {
+                 userId 
+                }
+         })
         if (alreadyInTeam) {
             return res.status(400).json({ message: "Cet utilisateur est déjà dans une équipe" })
         }
 
         const nbreMember = await Member.count({
-            where: { teamId: team.id }
+             where: { 
+                teamId: team.id 
+            } 
         })
 
         if (nbreMember >= team.capacity) {
             return res.status(400).json({ message: "L'équipe est déjà pleine" })
         }
 
-        const newMember = await Member.create({
-            userId,
-            teamId: team.id
-        })
+        const newMember = await Member.create({ userId, teamId: team.id })
+        res.status(201).json(newMember)
 
-        res.json(newMember)
-        
     } catch (error) {
-        console.log(error)
         res.status(500).json({ message: error.message })
     }
-
 }
 
 
 // US7B:Retirer un joueur d'un équipe
 exports.removeMember = async (req, res) => {
     try {
-       const user = await User.findByPk(req.params.userId)
-        
-       if(user === null){
-            return res.status(400).json({ message: "Utilisateur non trouvé" })
+        const user = await User.findByPk(req.params.userId)
+
+        if (user === null) {
+            return res.status(404).json({ message: "Utilisateur non trouvé" })
         }
 
         const team = await Team.findByPk(req.params.teamId)
-    
-        if(team.creatorId === req.user.id){
-            return res.status(403).json({message: "Seul le capitaine peut supprimer un membre "})
+
+        if (!team) {
+            return res.status(404).json({ message: "Equipe non trouvée" })
+        }
+
+        if (team.creatorId !== req.user.id) {
+            return res.status(403).json({ message: "Seul le capitaine peut supprimer un membre" })
         }
 
         const deletedMember = await Member.destroy({
-             where: {
+            where: {
                 userId: req.params.userId,
                 teamId: req.params.teamId
-        }
+            }
         })
 
-        if(deletedMember == 0){
-              return res.status(403).json({message: "Ce membre n'est pas dans votre équipe"})
+        if (deletedMember == 0) {
+            return res.status(404).json({ message: "Ce membre n'est pas dans votre équipe" })
         }
 
-
-        res.status(200).json({ message: "L'utilisateur a été supprimée" })
-
+        res.status(200).json({ message: "L'utilisateur a été retiré de l'équipe" })
 
     } catch (error) {
         res.status(500).json({ message: error.message })

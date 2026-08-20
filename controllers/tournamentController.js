@@ -191,6 +191,10 @@ exports.getTournamentTeam = async (req, res) => {
             return res.status(404).json("Ce tournoi existe pas")
         }
 
+        if (tournament.organizerId !== req.user.id) {
+            return res.status(403).json({ message: "Vous n'êtes pas l'organisateur de ce tournoi" })
+        }
+
         const register = await Registered.findAll({
             where: { tournamentId: tournament.id}
         })
