@@ -198,6 +198,12 @@ exports.getDetailTeam = async (req,res) => {
         if(!team){
             return res.status(404).json({ message: "Cet équipe existe pas" })
         }
+        const isCreator = req.user.id
+        const isPlayer = req.user.role === 'jouer'
+
+        if(!isCreator && !isPlayer){
+            return res.status(403).json({ message: "Seul le capitaine ou le joueur peut consulter" })
+        }
 
         const members = await Member.findAll({
             where: 
