@@ -54,7 +54,9 @@ exports.updateTournament = async (req, res) => {
         if(!isOwner){
             return res.status(403).json({ message: "Seul l'organisateur peut modifier un tournoi" })
         }
+
         const { name, game, date, rules } = req.body
+
         if(name){
             tournament.name = name
         }
@@ -217,7 +219,7 @@ exports.getTournamentTeam = async (req, res) => {
 
 
 
-// US15: Voir les statistiques des particpants
+// US15: Voir les statistiques des participants
 exports.getTournamentStat = async (req, res) => {
     try {
         const isAdmin = req.user.role === 'admin'
