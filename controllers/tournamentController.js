@@ -170,29 +170,33 @@ exports.getOpenTournament = async (req, res) => {
 }
 
 // US13:Voir les équipes inscrites aux tournoi
+// US13: Voir les équipes inscrites à mes tournois
 exports.getMyTournamentsTeams = async (req, res) => {
     try {
         const tournaments = await Tournament.findAll({
             where: { organizerId: req.user.id }
         })
 
-        const registrations = await Registered.findAll()
-        const teams = await Team.findAll()
+        const result = []
 
-        const result = tournaments.map(tournament => {
-            const registeredTeamIds = registrations
-                .filter(r => r.tournamentId === tournament.id)
-                .map(r => r.teamId)
+        for (const tournament of tournaments) {
+            const registrations = await Registered.findAll({
+                where: { tournamentId: tournament.id }
+            })
 
-            const registeredTeams = teams.filter(t => registeredTeamIds.includes(t.id))
+            const teamIds = registrations.map(r => r.teamId)
 
-            return {
+            const teams = await Team.findAll({
+                where: { id: teamIds }
+            })
+
+            result.push({
                 id: tournament.id,
                 name: tournament.name,
                 game: tournament.game,
-                teams: registeredTeams
-            }
-        })
+                teams: teams
+            })
+        }
 
         res.status(200).json(result)
 
