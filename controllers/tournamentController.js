@@ -136,6 +136,13 @@ exports.teamTournament = async (req, res) => {
             return res.status(400).json({ message: "Vous faites pas partie du team!!!!!" })
         }
 
+        const isPlayer = req.user.role === 'joueur'
+        const isCaptain = req.user.role === 'capitaine'
+
+        if (!isPlayer && !isCaptain) {
+            return res.status(403).json({ message: "Seul un joueur ou un capitaine peut inscrire une équipe" })
+        }
+
         const alreadyRegistered = await Registered.findOne({
             where: {
                 teamId: team.id,

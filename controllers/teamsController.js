@@ -191,33 +191,30 @@ exports.deleteTeam = async (req, res) => {
 }
 
 // US17 : consulter les informations d'une équipe
-exports.getDetailTeam = async (req,res) => {
+exports.getDetailTeam = async (req, res) => {
     try {
         const team = await Team.findByPk(req.params.teamId)
 
-        if(!team){
-            return res.status(404).json({ message: "Cet équipe existe pas" })
+        if (!team) {
+            return res.status(404).json({ message: "Cette équipe n'existe pas" })
         }
-        const isCreator = req.user.id
-        const isPlayer = req.user.role === 'jouer'
 
-        if(!isCreator && !isPlayer){
-            return res.status(403).json({ message: "Seul le capitaine ou le joueur peut consulter" })
+        const isPlayer = req.user.role === 'joueur'
+        const isCaptain = req.user.role === 'capitaine'
+
+        if (!isPlayer && !isCaptain) {
+            return res.status(403).json({ message: "Seul un joueur ou un capitaine peut consulter une équipe" })
         }
 
         const members = await Member.findAll({
-            where: 
-                {
-                 teamId: team.id
-                }
+            where: { teamId: team.id }
         })
 
-        const allUser = members.map ( m => m.userId)
+        const allUser = members.map(m => m.userId)
 
         const user = await User.findAll({
-            where: {
-                id: allUser,
-            }, attributes: ['id', 'email', 'role']
+            where: { id: allUser },
+            attributes: ['id', 'email', 'role']
         })
 
         res.status(200).json({
@@ -229,6 +226,6 @@ exports.getDetailTeam = async (req,res) => {
         })
 
     } catch (error) {
-         res.status(500).json({ message: error.message })
+        res.status(500).json({ message: error.message })
     }
 }
