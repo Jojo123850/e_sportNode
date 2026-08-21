@@ -1,17 +1,45 @@
 const express = require('express')
 require('dotenv').config()
 const { connectDB, sequelize } = require('./config/db')
-const app = express()
+const cors = require('cors')
+const helmet = require('helmet')
+const rateLimit = require('express-rate-limit')
+
+const app = express()          
 const port = process.env.PORT || 3001
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-app.get('/', (req, res) => {
-    res.send('Bienvenue sur mon API RESTful !')
-})
+
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes')
 const teamsRoutes = require('./routes/teamsRoutes')
 const tournamentRoutes = require('./routes/tournamentRoutes')
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+app.get('/', (req, res) => {
+    res.send('Bienvenue sur mon API RESTful !')
+})
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
+    message: { status: 429, error: 'Trop de requêtes, réessayer plus tard' }
+})
+
+app.use(
+    helmet({
+        contentSecurityPolicy: false,
+        crossOriginResourcePolicy: { policy: "cross-origin" }
+    })
+)
+
+const corsOptions = {
+    origin: ['https://storycom.fr', 'http://localhost:3001']
+}
+app.use(cors(corsOptions))
+
+app.use(limiter)
+
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/user', userRoutes)
 app.use('/api/v1/team', teamsRoutes)

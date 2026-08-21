@@ -168,33 +168,35 @@ exports.getOpenTournament = async (req, res) => {
     }
 }
 
-// US13:Voir les équipes inscrites à un tournoi
-exports.getTournamentTeam = async (req, res) => {
+// US13:Voir les équipes inscrites aux tournoi
+exports.getMyTournamentsTeams = async (req, res) => {
     try {
-        const tournament = await Tournament.findByPk(req.params.id)
-
-        if(!tournament){
-            return res.status(404).json("Ce tournoi existe pas")
-        }
-
-        if (tournament.organizerId !== req.user.id) {
-            return res.status(403).json({ message: "Vous n'êtes pas l'organisateur de ce tournoi" })
-        }
-
-        const register = await Registered.findAll({
-            where: { tournamentId: tournament.id}
+        const tournaments = await Tournament.findAll({
+            where: { organizerId: req.user.id }
         })
-        const allTeams = register.map(r=> r.teamId)
 
-        const team= await Team.findAll({
-            where: {
-                id:allTeams
+        const registrations = await Registered.findAll()
+        const teams = await Team.findAll()
+
+        const result = tournaments.map(tournament => {
+            const registeredTeamIds = registrations
+                .filter(r => r.tournamentId === tournament.id)
+                .map(r => r.teamId)
+
+            const registeredTeams = teams.filter(t => registeredTeamIds.includes(t.id))
+
+            return {
+                id: tournament.id,
+                name: tournament.name,
+                game: tournament.game,
+                teams: registeredTeams
             }
         })
-        res.status(200).json(team)
-        
+
+        res.status(200).json(result)
+
     } catch (error) {
-           res.status(500).json({ message: error.message })
+        res.status(500).json({ message: error.message })
     }
 }
 
@@ -227,35 +229,33 @@ exports.getTournamentStat = async (req, res) => {
 }
 
 // US18: consulter mes inscriptions à des tournois
-exports.getMyTournament = async (req,res) => {
+exports.getMyTournament = async (req, res) => {
     try {
         const memberRel = await Member.findOne({
-            where: 
-                {
-                 userId: req.user.id
-                }
+            where: { userId: req.user.id }
         })
 
         if (!memberRel) {
             return res.status(404).json({ message: "Vous ne faites partie d'aucune équipe" })
         }
-        
+
         const registration = await Registered.findAll({
-            where: {
-                teamId : memberRel.teamId
-            } 
+            where: { teamId: memberRel.teamId }
         })
+
         const tournamentIds = registration.map(r => r.tournamentId)
 
         const tournament = await Tournament.findAll({
-            where: {
-                id: tournamentIds
-            }
+            where: { id: tournamentIds }
         })
+        console.log('tournament:', tournament.map(t => t.dataValues))
+        if (tournament.length === 0) {
+            return res.status(200).json({ message: "Votre équipe n'est inscrite à aucun tournoi", tournaments: [] })
+        }
 
-        res.json(tournament)
-        
+        res.status(200).json({ tournaments: tournament })
+
     } catch (error) {
-         res.status(500).json({ message: error.message })
+        res.status(500).json({ message: error.message })
     }
 }

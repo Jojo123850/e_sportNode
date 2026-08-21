@@ -3,20 +3,20 @@ const router = express.Router()
 
 const { authMiddleware } = require('../middleware/authMiddleware')
 
-const { createTournament, updateTournament, deleteTournament,teamTournament, getOpenTournament, getTournamentTeam, getTournamentStat, getMyTournament} = require('../controllers/tournamentController')
+const { createTournament, updateTournament, deleteTournament,teamTournament, getOpenTournament, getMyTournamentsTeams, getTournamentStat, getMyTournament} = require('../controllers/tournamentController')
 
 router.post('/', authMiddleware, createTournament)
 
-router.put('/tournoi/:id', authMiddleware, updateTournament)
+router.put('/:id', authMiddleware, updateTournament)
 
 
-router.delete('/tournoi/delete/:id', authMiddleware, deleteTournament)
+router.delete('/delete/:id', authMiddleware, deleteTournament)
 
 router.post('/:tournamentId/register/:teamId', authMiddleware, teamTournament)
 
 router.get('/open', authMiddleware, getOpenTournament )
 
-router.get('/:id/teams', authMiddleware, getTournamentTeam )
+router.get('/mine/teams', authMiddleware, getMyTournamentsTeams)
 
 router.get('/stat/', authMiddleware, getTournamentStat)
 

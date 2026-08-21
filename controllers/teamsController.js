@@ -89,6 +89,7 @@ exports.addMember = async (req, res) => {
         }
 
         if (team.creatorId !== req.user.id) {
+            console.log('creatorId:', team.creatorId, '| req.user.id:', req.user.id)
             return res.status(403).json({ message: "Seul le capitaine peut ajouter un membre" })
         }
 
