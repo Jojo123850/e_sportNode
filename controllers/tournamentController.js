@@ -248,7 +248,7 @@ exports.getMyTournament = async (req, res) => {
         const tournament = await Tournament.findAll({
             where: { id: tournamentIds }
         })
-        console.log('tournament:', tournament.map(t => t.dataValues))
+        
         if (tournament.length === 0) {
             return res.status(200).json({ message: "Votre équipe n'est inscrite à aucun tournoi", tournaments: [] })
         }

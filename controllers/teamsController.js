@@ -34,9 +34,6 @@ exports.createTeam = async (req, res) => {
         res.status(201).json({ message: "Équipe créée avec succès", team })
 
     } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
-            return res.status(400).json({ message: "Ce nom d'équipe est déjà pris" })
-        }
         res.status(500).json({ message: error.message })
     }
 }
