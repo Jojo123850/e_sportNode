@@ -10,7 +10,7 @@ const generateToken = (id) => {
     return jwt.sign({ id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
 }
 
-// US1
+// US1:: Création de compte
 const register = async (req, res) => {
     try {
         const { email, password } = req.body  
@@ -52,7 +52,7 @@ const register = async (req, res) => {
     }
 }
 
-// US2
+// US2:Connexion
 const login = async (req, res) => {
     try {
         const { email, password } = req.body

@@ -9,7 +9,6 @@ router.post('/', authMiddleware, createTournament)
 
 router.put('/:id', authMiddleware, updateTournament)
 
-
 router.delete('/delete/:id', authMiddleware, deleteTournament)
 
 router.post('/:tournamentId/register/:teamId', authMiddleware, teamTournament)

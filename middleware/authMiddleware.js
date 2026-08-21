@@ -5,16 +5,16 @@ const JWT_SECRET = process.env.JWT_SECRET
 const authMiddleware = async  (req,res, next) => {
     try {
         let token 
-        // si l'authorization commence par bearer c'est que on a le token
+
         if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
             token = req.headers.authorization.split(' ')[1]
         }
         if(!token){
             return res.status(401).json({message: 'Not authorized,  token missing'})
         }
-        // verify token
+
         const decoded = jwt.verify(token, JWT_SECRET)
-        // gET USER FROM TOKEN payload
+
         const user = await User.findByPk(decoded.id)
         if(!user){
              return res.status(401).json({message: 'User no longer exists'})

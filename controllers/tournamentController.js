@@ -2,7 +2,8 @@ const Tournament = require('../models/tournamentModel')
 const Registered = require('../models/tourRegisteredModel')
 const Team = require('../models/teamsModel')
 const Member = require('../models/memberModel')
-// US8
+
+// US8:: Créer un tournoi
 exports.createTournament = async (req, res) => {
     try {
         const { name, game, date, rules } = req.body
@@ -28,7 +29,7 @@ exports.createTournament = async (req, res) => {
     }
 }
 
-// US9
+// US9:Modifier un tournoi
 exports.updateTournament = async (req, res) => {
     try {
           const tournament = await Tournament.findByPk(req.params.id)
@@ -248,7 +249,7 @@ exports.getMyTournament = async (req, res) => {
         const tournament = await Tournament.findAll({
             where: { id: tournamentIds }
         })
-        
+
         if (tournament.length === 0) {
             return res.status(200).json({ message: "Votre équipe n'est inscrite à aucun tournoi", tournaments: [] })
         }
