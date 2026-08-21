@@ -11,13 +11,11 @@ exports.createTeam = async (req, res) => {
             return res.status(400).json({ message: "Le nom de l'équipe est requis" })
         }
 
-        
         const alreadyInTeam = await Member.findOne({
             where: { 
                 userId: req.user.id 
             }
         })
-
         if (alreadyInTeam) {
             return res.status(400).json({ message: "Vous êtes déjà dans une équipe" })
         }
@@ -198,14 +196,12 @@ exports.getDetailTeam = async (req, res) => {
         if (!team) {
             return res.status(404).json({ message: "Cette équipe n'existe pas" })
         }
-
         const isPlayer = req.user.role === 'joueur'
         const isCaptain = req.user.role === 'capitaine'
 
         if (!isPlayer && !isCaptain) {
             return res.status(403).json({ message: "Seul un joueur ou un capitaine peut consulter une équipe" })
         }
-
         const members = await Member.findAll({
             where: { teamId: team.id }
         })

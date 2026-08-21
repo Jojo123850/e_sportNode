@@ -5,16 +5,13 @@ const bcrypt = require('bcrypt')
 
 
 // US4 - Modifier mon profil
-
 exports.updateProfile = async (req, res) => {
     try {
         const user = await User.findByPk(req.user.id)
         if (!user) {
             return res.status(404).json({ message: 'Utilisateur non trouvé' })
         }
-
         const { email, password } = req.body
-
         if (email) {
             if (!validator.isEmail(email)) {
                 return res.status(400).json({ message: 'You must provide a valid email' })
@@ -25,7 +22,6 @@ exports.updateProfile = async (req, res) => {
             }
             user.email = email
         }
-
         if (password) {
             const isPasswordOk = validator.isStrongPassword(password, {
                 minLength: 6, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1
@@ -35,14 +31,11 @@ exports.updateProfile = async (req, res) => {
             }
             user.password = await bcrypt.hash(password, 10)
         }
-
         await user.save()
-
         res.status(200).json({
             message: 'Profil mis à jour',
             user: { id: user.id, email: user.email, role: user.role }
         })
-
     } catch (error) {
         res.status(500).json({ message: error.message })
     }

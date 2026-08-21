@@ -1,10 +1,7 @@
-
 const Tournament = require('../models/tournamentModel')
 const Registered = require('../models/tourRegisteredModel')
 const Team = require('../models/teamsModel')
 const Member = require('../models/memberModel')
-
-
 // US8
 exports.createTournament = async (req, res) => {
     try {
@@ -20,16 +17,7 @@ exports.createTournament = async (req, res) => {
             return res.status(403).json({ message: "Seul l'organisateur peut créer un tournoi" })
         }
         
-         const newTour = await Tournament.create({
-            name,
-            game,
-            date,
-            rules,
-            organizerId: req.user.id
-     
-        })
-
-
+        const newTour = await Tournament.create({name,game,date,rules,organizerId: req.user.id})
         res.status(201).json(newTour)
 
     } catch (error) {
@@ -110,13 +98,10 @@ exports.deleteTournament = async (req, res) => {
 // US11: inscrire une équipe au tournoi
 exports.teamTournament = async (req, res) => {
     try {
-
-     
         const team = await Team.findByPk(req.params.teamId)
 
         if(!team){
             return res.status(404).json("Cette équipe existe pas !")
-
         }
 
         const tournament = await Tournament.findByPk(req.params.tournamentId)
@@ -156,17 +141,9 @@ exports.teamTournament = async (req, res) => {
 
         const touRegist = await Registered.create({
                 teamId: team.id,
-                tournamentId: tournament.id
-
-            
+                tournamentId: tournament.id 
         })
-        
-
-
-    res.status(201).json("Vous etes officielement inscrit à ce tournoi")
-        
-
-        
+    res.status(201).json("Vous etes officielement inscrit à ce tournoi") 
     } catch (error) {
           res.status(500).json({ message: error.message })
     }
@@ -207,7 +184,6 @@ exports.getTournamentTeam = async (req, res) => {
         const register = await Registered.findAll({
             where: { tournamentId: tournament.id}
         })
-
         const allTeams = register.map(r=> r.teamId)
 
         const team= await Team.findAll({
@@ -215,8 +191,6 @@ exports.getTournamentTeam = async (req, res) => {
                 id:allTeams
             }
         })
- 
-
         res.status(200).json(team)
         
     } catch (error) {
@@ -224,17 +198,13 @@ exports.getTournamentTeam = async (req, res) => {
     }
 }
 
-
-
 // US15: Voir les statistiques des participants
 exports.getTournamentStat = async (req, res) => {
     try {
         const isAdmin = req.user.role === 'admin'
-
         if (!isAdmin) {
             return res.status(403).json({ message: "Seul l'administrateur peut consulter ces statistiques" })
         }
-
         const tournament = await Tournament.findAll()
         const registration = await Registered.findAll()
 
@@ -249,7 +219,6 @@ exports.getTournamentStat = async (req, res) => {
                 teamCount
             }
         })
-
         res.status(200).json(stat)
 
     } catch (error) {
@@ -270,7 +239,7 @@ exports.getMyTournament = async (req,res) => {
         if (!memberRel) {
             return res.status(404).json({ message: "Vous ne faites partie d'aucune équipe" })
         }
-
+        
         const registration = await Registered.findAll({
             where: {
                 teamId : memberRel.teamId
